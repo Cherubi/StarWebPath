@@ -17,6 +17,14 @@ public class CorridorSet {
 	private int onGoingId;
 	//corridors have odd numbers
 	
+	//TODO tests
+	
+	/**
+	 * Opens the corridor set from a string.
+	 * 
+	 * @param savefile Information of the corridors.
+	 * @param savesize How many objects were saved. (Includes all Spaces.)
+	 */
 	public CorridorSet(String savefile, int savesize) {
 		this.corridors = new Corridor[savesize];
 		
@@ -42,8 +50,8 @@ public class CorridorSet {
 		double matLength = Double.parseDouble(tidbit[3]);
 		
 		Corridor newCorridor = new Corridor(id, length);
-		newCorridor.setJumpheigth(jumpheight);
-		newCorridor.putMat(matLength);
+		newCorridor.setJumpheight(jumpheight);
+		newCorridor.setMat(matLength);
 		
 		corridors[(id-1)/2] = newCorridor;
 	}
@@ -82,15 +90,26 @@ public class CorridorSet {
 		corridors = newVersionOfCorridors;
 	}
 	
+	/**
+	 * Adds a new corridor the the set.
+	 * 
+	 * @param corridor The corridor to be added.
+	 */
 	public void addCorridor(Corridor corridor) {
 		if (onGoingId == corridors.length) {
 			doubleSize();
 		}
 		
+		//TODO id
 		corridors[onGoingId] = corridor;
 		onGoingId++;
 	}
 	
+	/**
+	 * Removes a corridor from the set. No rooms or inner yards are removed.
+	 * 
+	 * @param id Corridors id.
+	 */
 	public void removeCorridor(int id) {
 		if (id < 0 || id >= corridors.length) {
 			return;
@@ -99,6 +118,12 @@ public class CorridorSet {
 		corridors[id] = null;
 	}
 	
+	/**
+	 * Gives a corridor by the id.
+	 * 
+	 * @param id id of the corridor that is wanted.
+	 * @return Returns the wanted corridor.
+	 */
 	public Corridor getCorridor(int id) {
 		if (id < 0 || id >= corridors.length) {
 			return null;
@@ -107,12 +132,17 @@ public class CorridorSet {
 		return corridors[id];
 	}
 	
+	/**
+	 * Makes the String that is used to save all the information onto a file.
+	 * 
+	 * @return All corridor's information.
+	 */
 	public String saveString() {
 		String savefile = "";
 		for (int i=0; i<onGoingId; i++) {
 			Corridor corridor = corridors[i];
 			if (corridor != null) {
-				savefile += (i*2+1) + " " + corridor.giveLength() + " " + corridor.giveJumpheigth() + "\n";
+				savefile += (i*2+1) + " " + corridor.getLength() + " " + corridor.getJumpheight() + "\n";
 			}
 		}
 		

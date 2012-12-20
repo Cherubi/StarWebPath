@@ -15,6 +15,14 @@ public class SpaceSet {
 	private int onGoingId;
 	//rooms and yards have even numbers
 	
+	//TODO tests
+	
+	/**
+	 * Opens all spaces sans corridors from a String.
+	 * 
+	 * @param savefile Information of the spaces sans corridors.
+	 * @param savesize Amount of all the spaces.
+	 */
 	public SpaceSet(String savefile, int savesize) {
 		this.spaces = new Space[savesize];
 		
@@ -109,15 +117,26 @@ public class SpaceSet {
 		spaces = newVersionOfSpaces;
 	}
 	
+	/**
+	 * Adds a space to the set.
+	 * 
+	 * @param space Space to be added.
+	 */
 	public void addSpace(Space space) {
 		if (onGoingId == spaces.length) {
 			doubleSize();
 		}
 		
+		//TODO id
 		spaces[onGoingId] = space;
 		onGoingId++;
 	}
 	
+	/**
+	 * Removes a Space by the id. Also removes corridors leading to it.
+	 * 
+	 * @param id id of the space.
+	 */
 	public void removeSpace(int id) {
 		if (id < 0 || id >= spaces.length) {
 			return;
@@ -127,6 +146,12 @@ public class SpaceSet {
 		spaces[id] = null;
 	}
 	
+	/**
+	 * Returns the requested space.
+	 * 
+	 * @param id id of the space.
+	 * @return Requested space.
+	 */
 	public Space getSpace(int id) {
 		if (id < 0 || id >= spaces.length) {
 			return null;
@@ -135,6 +160,11 @@ public class SpaceSet {
 		return spaces[id];
 	}
 	
+	/**
+	 * Makes a String of the set to be saved.
+	 * 
+	 * @return String with the information.
+	 */
 	public String saveString() {
 		String savefile = "";
 		for (int i=0; i<onGoingId; i++) {

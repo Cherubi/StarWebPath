@@ -143,6 +143,8 @@ public class SpaceSet {
 		}
 		
 		//TODO remove also neighbors and paths
+		//ArrayList<Integer> paths = spaces[id]
+		
 		spaces[id] = null;
 	}
 	

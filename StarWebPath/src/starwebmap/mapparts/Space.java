@@ -23,7 +23,8 @@ public class Space {
 	private Biotype biotype;
 	
 	/**
-	 * A defined space/area/room
+	 * A defined space/area/room. All new spaces are given the id -1.
+	 * A proper id is given when the space is added to the set of corridors or vortexspaces.
 	 * 
 	 * @param id defining integer
 	 * @param size size of the space
@@ -42,6 +43,11 @@ public class Space {
 	 */
 	public int getId() {
 		return this.id;
+	}
+	
+	//TODO test
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	/**
@@ -104,7 +110,12 @@ public class Space {
 		}
 	}
 	
-	//will tell whether the given creature can enter the space or not
+	/**
+	 * Will tell whether the given creature can enter the space or not.
+	 * 
+	 * @param oergi The creature wanting passage
+	 * @return Whether or not could gain passage
+	 */
 	public boolean gainPassage(Oergi oergi) {
 		Element element = oergi.getElement();
 		ElementMovability elementMovability = new ElementMovability();

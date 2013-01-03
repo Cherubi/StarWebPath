@@ -21,6 +21,11 @@ public enum Element {
 		this.id = id;
 	}
 	
+	/**
+	 * Gives the id of the element.
+	 * 
+	 * @return 
+	 */
 	public int getId() {
 		return this.id;
 	}

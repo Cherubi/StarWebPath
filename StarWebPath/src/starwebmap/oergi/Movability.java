@@ -5,7 +5,8 @@
 package starwebmap.oergi;
 
 /**
- *
+ * All the possible movabilities of creatures.
+ * 
  * @author Usagi-chan
  */
 public enum Movability {

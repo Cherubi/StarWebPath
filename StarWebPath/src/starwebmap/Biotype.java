@@ -19,6 +19,11 @@ public enum Biotype {
 		this.id = id;
 	}
 	
+	/**
+	 * Returns the id of the biotype.
+	 * 
+	 * @return Biotype id
+	 */
 	public int getId() {
 		return this.id;
 	}

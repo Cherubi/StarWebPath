@@ -20,6 +20,12 @@ import starwebmap.oergi.Oergi;
 
 public class Room extends VortexSpace {
 	
+	/**
+	 * Takes care of defining a room in the game.
+	 * 
+	 * @param id Room's id
+	 * @param size Room's size
+	 */
 	public Room(int id, int size) {
 		super(id, size);
 	}

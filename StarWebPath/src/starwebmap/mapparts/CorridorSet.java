@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 public class CorridorSet {
 	private Corridor[] corridors;
-	private int onGoingId;
 	//corridors have odd numbers
 	
 	//TODO tests
@@ -37,8 +36,6 @@ public class CorridorSet {
 				makeOuterCorridor(corridorList[i]);
 			}
 		}
-		
-		findFreeId();
 	}
 	
 	private void makeCorridor(String information) {
@@ -68,16 +65,17 @@ public class CorridorSet {
 		corridors[(id-1)/2] = newCorridor;
 	}
 	
-	private void findFreeId() {
+	private int findFreeId() {
 		for (int i=0; i<corridors.length; i++) {
 			if (corridors[i] == null) { //check if null's have to be put
-				onGoingId = i;
-				return;
+				return i;
 			}
 		}
 		
-		onGoingId = corridors.length;
+		int onGoingId = corridors.length;
 		doubleSize();
+		
+		return onGoingId;
 	}
 	
 	private void doubleSize() {
@@ -96,13 +94,9 @@ public class CorridorSet {
 	 * @param corridor The corridor to be added.
 	 */
 	public void addCorridor(Corridor corridor) {
-		if (onGoingId == corridors.length) {
-			doubleSize();
-		}
-		
-		//TODO id
+		int onGoingId = findFreeId();
+		corridor.setId(onGoingId*2+1);
 		corridors[onGoingId] = corridor;
-		onGoingId++;
 	}
 	
 	/**
@@ -139,7 +133,7 @@ public class CorridorSet {
 	 */
 	public String saveString() {
 		String savefile = "";
-		for (int i=0; i<onGoingId; i++) {
+		for (int i=0; i<corridors.length; i++) {
 			Corridor corridor = corridors[i];
 			if (corridor != null) {
 				savefile += (i*2+1) + " " + corridor.getLength() + " " + corridor.getJumpheight() + "\n";

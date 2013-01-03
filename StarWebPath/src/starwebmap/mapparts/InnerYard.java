@@ -21,6 +21,12 @@ import starwebmap.oergi.Oergi;
 public class InnerYard extends VortexSpace {
 	private int yield;
 	
+	/**
+	 * Takes care of defining the inner yard in the game.
+	 * 
+	 * @param id Inner yards id
+	 * @param size Inner yards size
+	 */
 	public InnerYard(int id, int size) {
 		super(id, size);
 		this.yield = size*0;

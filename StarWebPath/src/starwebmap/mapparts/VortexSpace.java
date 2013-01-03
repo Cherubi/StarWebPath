@@ -8,6 +8,7 @@ package starwebmap.mapparts;
 import java.util.ArrayList;
 
 /**
+ * Is a vortex with the ability to be a space and have neighbors on the web.
  *
  * @author Cherubi
  */
@@ -16,6 +17,12 @@ public class VortexSpace extends Space {
 	private ArrayList<Integer> paths;
 	private ArrayList<Integer> neighboringSpaces;
 	
+	/**
+	 * Takes care of a space between corridors in the game. Can be either room or inner yard.
+	 * 
+	 * @param id id of the space
+	 * @param size size of the space
+	 */
 	public VortexSpace(int id, int size) {
 		super(id, size);
 		
@@ -41,6 +48,16 @@ public class VortexSpace extends Space {
 	 */
 	public ArrayList<Integer> getNeighbors() {
 		return neighboringSpaces;
+	}
+	
+	//TODO test
+	/**
+	 * Returns the amount of neighbors.
+	 * 
+	 * @return Amount of neighbors
+	 */
+	public int getNeighborAmount() {
+		return neighboringSpaces.size();
 	}
 	
 	/**

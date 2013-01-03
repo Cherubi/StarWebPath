@@ -5,14 +5,18 @@
 
 package starwebmap.mapparts;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  *
  * @author Cherubi
  */
 
-public class SpaceSet {
-	private Space[] spaces;
-	private int onGoingId;
+public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpace> {
+	private VortexSpace[] vortexSpaces;
+	private int count;
 	//rooms and yards have even numbers
 	
 	//TODO tests
@@ -23,8 +27,8 @@ public class SpaceSet {
 	 * @param savefile Information of the spaces sans corridors.
 	 * @param savesize Amount of all the spaces.
 	 */
-	public SpaceSet(String savefile, int savesize) {
-		this.spaces = new Space[savesize];
+	public VortexSpaceSet(String savefile, int savesize) {
+		this.vortexSpaces = new VortexSpace[savesize];
 		
 		String[] spaceList = savefile.split("\n");
 		for (int i=0; i<spaceList.length; i++) {
@@ -35,8 +39,6 @@ public class SpaceSet {
 				makeYard(spaceList[i]);
 			}
 		}
-		
-		findFreeId();
 	}
 	
 	private void makeRoom(String information) {
@@ -47,7 +49,7 @@ public class SpaceSet {
 		Room newRoom = makeLonelyRoom(tidbit);
 		addContacts(newRoom, neighbors);
 		
-		spaces[newRoom.getId()/2] = newRoom;
+		vortexSpaces[newRoom.getId()/2] = newRoom;
 	}
 	
 	private Room makeLonelyRoom(String[] info) {
@@ -84,7 +86,7 @@ public class SpaceSet {
 		
 		addContacts(innerYard, contacts);
 		
-		spaces[innerYard.getId()/2] = innerYard;
+		vortexSpaces[innerYard.getId()/2] = innerYard;
 	}
 	
 	private void addContacts(InnerYard innerYard, String[] neighbors) {
@@ -95,26 +97,27 @@ public class SpaceSet {
 		}
 	}
 	
-	private void findFreeId() {
-		for (int i=spaces.length-1; i>=0; i--) {
-			if (spaces[i] != null) { //check if null's have to be put
-				onGoingId = i;
-				return;
+	private int findFreeId() {
+		for (int i=vortexSpaces.length-1; i>=0; i--) {
+			if (vortexSpaces[i] == null) { //check if null's have to be put
+				return i;
 			}
 		}
 		
-		onGoingId = spaces.length;
+		int onGoingId = vortexSpaces.length;
 		doubleSize();
+		
+		return onGoingId;
 	}
 	
 	private void doubleSize() {
-		Space[] newVersionOfSpaces = new Space[spaces.length*2];
+		VortexSpace[] newVersionOfSpaces = new VortexSpace[vortexSpaces.length*2];
 		
-		for (int i=0; i<spaces.length; i++) {
-			newVersionOfSpaces[i] = spaces[i];
+		for (int i=0; i<vortexSpaces.length; i++) {
+			newVersionOfSpaces[i] = vortexSpaces[i];
 		}
 		
-		spaces = newVersionOfSpaces;
+		vortexSpaces = newVersionOfSpaces;
 	}
 	
 	/**
@@ -122,14 +125,10 @@ public class SpaceSet {
 	 * 
 	 * @param space Space to be added.
 	 */
-	public void addSpace(Space space) {
-		if (onGoingId == spaces.length) {
-			doubleSize();
-		}
-		
-		//TODO id
-		spaces[onGoingId] = space;
-		onGoingId++;
+	public void addVortexSpace(VortexSpace space) {
+		int onGoingId = findFreeId();
+		space.setId(onGoingId*2);
+		vortexSpaces[onGoingId] = space;
 	}
 	
 	/**
@@ -138,14 +137,15 @@ public class SpaceSet {
 	 * @param id id of the space.
 	 */
 	public void removeSpace(int id) {
-		if (id < 0 || id >= spaces.length) {
+		if (id < 0 || id >= vortexSpaces.length) {
 			return;
 		}
 		
 		//TODO remove also neighbors and paths
-		//ArrayList<Integer> paths = spaces[id]
+		ArrayList<Integer> paths = vortexSpaces[id].getPaths();
+		ArrayList<Integer> neighbors = vortexSpaces[id].getNeighbors();
 		
-		spaces[id] = null;
+		vortexSpaces[id/2] = null;
 	}
 	
 	/**
@@ -155,11 +155,21 @@ public class SpaceSet {
 	 * @return Requested space.
 	 */
 	public Space getSpace(int id) {
-		if (id < 0 || id >= spaces.length) {
+		if (id < 0 || id >= vortexSpaces.length) {
 			return null;
 		}
 		
-		return spaces[id];
+		return vortexSpaces[id];
+	}
+	
+	/**
+	 * Returns the upper limit on how many spaces there might be.
+	 * TODO test
+	 * 
+	 * @return Maximum amount of spaces
+	 */
+	public int getVortexAmount() {
+		return vortexSpaces.length;
 	}
 	
 	/**
@@ -169,8 +179,8 @@ public class SpaceSet {
 	 */
 	public String saveString() {
 		String savefile = "";
-		for (int i=0; i<onGoingId; i++) {
-			Space space = spaces[i];
+		for (int i=0; i<vortexSpaces.length; i++) {
+			Space space = vortexSpaces[i];
 			if (space != null) {
 				if (space instanceof Room) {
 					Room room = (Room)space;
@@ -186,5 +196,43 @@ public class SpaceSet {
 		}
 		
 		return savefile;
+	}
+	
+	//TEST
+	/**
+	 * Tells whether or not there are more vortexes to follow (for each).
+	 * 
+	 * @return Whether or not there are more vortexes
+	 */
+	@Override
+	public boolean hasNext() {
+		if (count < vortexSpaces.length) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Gives the next VortexSpace in for each.
+	 * 
+	 * @return Next vortex space
+	 */
+	@Override
+	public VortexSpace next() {
+		if (count == vortexSpaces.length)
+			throw new NoSuchElementException();
+		
+		count++;
+		return vortexSpaces[count-1];
+	}
+	
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	// This method implements Iterable.
+	public Iterator<VortexSpace> iterator() {
+		return this;
 	}
 }

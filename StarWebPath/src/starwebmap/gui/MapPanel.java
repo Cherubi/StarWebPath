@@ -36,9 +36,10 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	 * Defines the size of the map circle to be as wide as high.
 	 */
 	public void defineSizeFor3DConversions() {
-		this.smallerDimension = Math.min(this.getWidth(), this.getHeight());
+		this.smallerDimension = Math.min(this.getWidth(), this.getHeight()) - 60;
 		
 		this.sphereConverter = new Sphere3DConverter(x, y, smallerDimension);
+		this.sphereConverter.setCenterCoordinate(new Coordinate(0, 0.785));
 	}
 
 	/**
@@ -147,15 +148,42 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	@Override
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.fillOval(x, y, smallerDimension-60, smallerDimension-60);
+		g.fillOval(x, y, smallerDimension, smallerDimension);
 		
+		drawLines(g);
 		drawStars(g);
 		
 		paintHelpText(g);
 	}
 	
-	private void drawStars(Graphics g) {
+	private void drawLines(Graphics g) {
+		g.setColor(Color.YELLOW);
+		for (int longitude = -90; longitude <= 90; longitude++) {
+			for (int latitude = -90; latitude <= 90; latitude += 10) {
+				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				g.drawLine(x, y, x, y);
+			}
+		}
 		
+		for (int longitude = -90; longitude <= 90; longitude += 10) {
+			for (int latitude = -90; latitude <= 90; latitude++) {
+				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				g.drawLine(x, y, x, y);
+			}
+		}
+	}
+	
+	private void drawStars(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0, true)-2, sphereConverter.giveWindowYCoordinate(0, 0, true)-2, 4, 4);
+		g.setColor(Color.MAGENTA);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0, true)-2, sphereConverter.giveWindowYCoordinate(0.785, 0, true)-2, 4, 4);
+		g.setColor(Color.RED);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0.785, true)-2, sphereConverter.giveWindowYCoordinate(0, 0.785, true)-2, 4, 4);
+		g.setColor(Color.GREEN);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0.785, true)-2, sphereConverter.giveWindowYCoordinate(0.785, 0.785, true)-2, 4, 4);
 	}
 	
 	private void paintHelpText(Graphics g) {

@@ -28,7 +28,6 @@ public class Sphere3DConverter {
 		
 		this.longitude = 0.0;
 		this.latitude = 0.0;
-		this.north = 0.0; //clockwise from north
 	}
 	
 	/**
@@ -55,5 +54,29 @@ public class Sphere3DConverter {
 		//TODO
 		
 		return new Coordinate(0,0);
+	}
+	
+	public int giveWindowXCoordinate(double longitude, double latitude, boolean help) {
+		int xDistanceFromCenter = (int)( Math.sin(longitude-this.longitude) * radius
+				* Math.cos(latitude) );
+		
+		if (help)
+			System.out.println(xDistanceFromCenter + centerX);
+		return xDistanceFromCenter + centerX;
+	}
+	
+	public int giveWindowYCoordinate(double longitude, double latitude, boolean help) {
+		double yDistanceFromLatitudeCenter = Math.sin(this.latitude)
+				* Math.cos(longitude-this.longitude) * radius
+				* Math.cos(latitude);
+		
+		double yLatitudeDistanceFromCenter = Math.cos(this.latitude)
+				* radius * Math.sin(latitude);
+		
+		
+		int yDistanceFromCenter = (int) (yLatitudeDistanceFromCenter + yDistanceFromLatitudeCenter);
+		if (help)
+			System.out.println(yDistanceFromCenter);
+		return centerY - yDistanceFromCenter;
 	}
 }

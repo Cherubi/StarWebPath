@@ -13,13 +13,19 @@ package starwebmap.gui;
 public class Coordinate {
 	private double lon, lat;
 	
+	/**
+	 * Contains a coordinate in radians.
+	 * 
+	 * @param lon Longitude in radians
+	 * @param lat Latitude in radians
+	 */
 	public Coordinate(double lon, double lat) {
 		this.lon = lon;
 		this.lat = lat;
 	}
 	
 	/**
-	 * Returns the longitude of the coordinate.
+	 * Returns the longitude of the coordinate in radians.
 	 * 
 	 * @return Longitude
 	 */
@@ -28,7 +34,7 @@ public class Coordinate {
 	}
 	
 	/**
-	 * Returns the latitude of the coordinate.
+	 * Returns the latitude of the coordinate in radians.
 	 * 
 	 * @return Latitude
 	 */

@@ -15,11 +15,14 @@ import javax.swing.JPanel;
  * @author Cherubi
  */
 
-public class MapPanel extends JPanel implements ActionListener, MouseMotionListener, MouseListener {
+public class MapPanel extends JPanel implements ActionListener, MouseMotionListener, MouseListener, MouseWheelListener {
 	private int x, y, smallerDimension;
 	private Sphere3DConverter sphereConverter;
 	private String action = "", helpText;
+	
 	private Coordinate mouseCoordinate;
+	private int mouseCoordinateX, mouseCoordinateY;
+	private boolean changeInMouseCoordinates;
 	
 	/**
 	 * A JPanel that paints a view of the map.
@@ -27,9 +30,15 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	public MapPanel() {
 		this.x = 80;
 		this.y = 30;
+		this.setBackground(new Color(30, 30, 40));
 		
 		mouseCoordinate = new Coordinate(0,0);
+		this.changeInMouseCoordinates = false;
 		helpText = "Click on a button to choose an action.";
+		
+		this.addMouseMotionListener(this);
+		this.addMouseWheelListener(this);
+		MouseMotionTimer mouseMotionTimer = new MouseMotionTimer(500, this);
 	}
 	
 	/**
@@ -39,7 +48,7 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 		this.smallerDimension = Math.min(this.getWidth(), this.getHeight()) - 60;
 		
 		this.sphereConverter = new Sphere3DConverter(x, y, smallerDimension);
-		this.sphereConverter.setCenterCoordinate(new Coordinate(0, 0.785));
+		this.sphereConverter.setCenterCoordinate(new Coordinate(0.2, 0.785));
 	}
 
 	/**
@@ -59,30 +68,32 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	 */
 	@Override
 	public void mouseClicked(MouseEvent me) {
-		Coordinate actionCoordinate = sphereConverter.giveMouseCoordinates(me.getX(), me.getY());
-		executeAction(actionCoordinate);
+		this.mouseCoordinateX = me.getX();
+		this.mouseCoordinateY = me.getY();
+		this.changeInMouseCoordinates = true;
+		executeAction();
 	}
 	
-	private void executeAction(Coordinate actionCoordinate) {
+	private void executeAction() {
 		if (action.length() == 0) {
 			return;
 		}
 		
 		if (action.contains("Add")) {
-			executeAdding(actionCoordinate);
+			executeAdding();
 		}
 		else if (action.contains("Remove")) {
-			executeRemoving(actionCoordinate);
+			executeRemoving();
 		}
 		else if (action.contains("Select")) {
-			executeSelecting(actionCoordinate);
+			executeSelecting();
 		}
 		else if (action.contains("Choose")) {
-			executePathChoosing(actionCoordinate);
+			executePathChoosing();
 		}
 	}
 	
-	private void executeAdding(Coordinate actionCoordinate) {
+	private void executeAdding() {
 		if (action.contains("rooms")) {
 			
 		}
@@ -94,7 +105,7 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 		}
 	}
 	
-	private void executeRemoving(Coordinate actionCoordinate) {
+	private void executeRemoving() {
 		if (action.contains("rooms")) {
 			
 		}
@@ -106,26 +117,51 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 		}
 	}
 	
-	private void executeSelecting(Coordinate actionCoordinate) {
+	private void executeSelecting() {
 	
 	}
 	
-	private void executePathChoosing(Coordinate actionCoordinate) {
+	private void executePathChoosing() {
 		
 	}
 
+	/**
+	 * Does nothing.
+	 * 
+	 * @param me Mouse event
+	 */
 	@Override
 	public void mousePressed(MouseEvent me) {}
 
+	/**
+	 * Does nothing.
+	 * 
+	 * @param me Mouse event
+	 */
 	@Override
 	public void mouseReleased(MouseEvent me) {}
 
+	/**
+	 * Does nothing.
+	 * 
+	 * @param me Mouse event
+	 */
 	@Override
 	public void mouseEntered(MouseEvent me) {}
 
+	/**
+	 * Does nothing.
+	 * 
+	 * @param me Mouse event
+	 */
 	@Override
 	public void mouseExited(MouseEvent me) {}
 
+	/**
+	 * Does nothing.
+	 * 
+	 * @param me Mouse event
+	 */
 	@Override
 	public void mouseDragged(MouseEvent me) {}
 	
@@ -136,7 +172,31 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	 */
 	@Override
 	public void mouseMoved(MouseEvent me) {
-		mouseCoordinate = sphereConverter.giveMouseCoordinates(me.getX(), me.getY());
+		this.mouseCoordinateX = me.getX();
+		this.mouseCoordinateY = me.getY();
+		this.changeInMouseCoordinates = true;
+	}
+	
+	/**
+	 * Updates the coordinates of the mouse on the sphere on the panel.
+	 */
+	public void updateMouseCoordinates() {
+		if (changeInMouseCoordinates) {
+			this.mouseCoordinate = sphereConverter.giveMouseCoordinates(mouseCoordinateX, mouseCoordinateY);
+			repaint();
+		}
+		this.changeInMouseCoordinates = false;
+	}
+	
+	/**
+	 * Catches the action of the mouse wheel rolling.
+	 * 
+	 * @param mwe Mouse wheel event
+	 */
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent mwe) {
+		int zoomAmount = mwe.getUnitsToScroll();
+		sphereConverter.zoom(zoomAmount);
 		repaint();
 	}
 	
@@ -147,43 +207,59 @@ public class MapPanel extends JPanel implements ActionListener, MouseMotionListe
 	 */
 	@Override
 	public void paint(Graphics g) {
+		super.paint(g);
 		g.setColor(Color.BLACK);
 		g.fillOval(x, y, smallerDimension, smallerDimension);
 		
 		drawLines(g);
 		drawStars(g);
+		drawPaths(g);
 		
+		paintCoordinateText(g);
 		paintHelpText(g);
 	}
 	
 	private void drawLines(Graphics g) {
-		g.setColor(Color.YELLOW);
-		for (int longitude = -90; longitude <= 90; longitude++) {
+		g.setColor(Color.BLUE);
+		for (int longitude = -180; longitude <= 180; longitude++) {
 			for (int latitude = -90; latitude <= 90; latitude += 10) {
-				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
-				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180);
+				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180);
 				g.drawLine(x, y, x, y);
 			}
 		}
 		
-		for (int longitude = -90; longitude <= 90; longitude += 10) {
+		for (int longitude = -180; longitude <= 180; longitude += 10) {
 			for (int latitude = -90; latitude <= 90; latitude++) {
-				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
-				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180, false);
+				int x = sphereConverter.giveWindowXCoordinate(longitude*Math.PI/180, latitude*Math.PI/180);
+				int y = sphereConverter.giveWindowYCoordinate(longitude*Math.PI/180, latitude*Math.PI/180);
 				g.drawLine(x, y, x, y);
 			}
 		}
+		
+		sphereConverter.setWindowCoordsUpdated();
 	}
 	
 	private void drawStars(Graphics g) {
 		g.setColor(Color.WHITE);
-		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0, true)-2, sphereConverter.giveWindowYCoordinate(0, 0, true)-2, 4, 4);
-		g.setColor(Color.MAGENTA);
-		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0, true)-2, sphereConverter.giveWindowYCoordinate(0.785, 0, true)-2, 4, 4);
-		g.setColor(Color.RED);
-		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0.785, true)-2, sphereConverter.giveWindowYCoordinate(0, 0.785, true)-2, 4, 4);
-		g.setColor(Color.GREEN);
-		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0.785, true)-2, sphereConverter.giveWindowYCoordinate(0.785, 0.785, true)-2, 4, 4);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0)-2, sphereConverter.giveWindowYCoordinate(0, 0)-2, 4, 4);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0)-2, sphereConverter.giveWindowYCoordinate(0.785, 0)-2, 4, 4);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0, 0.785)-2, sphereConverter.giveWindowYCoordinate(0, 0.785)-2, 4, 4);
+		g.fillOval(sphereConverter.giveWindowXCoordinate(0.785, 0.785)-2, sphereConverter.giveWindowYCoordinate(0.785, 0.785)-2, 4, 4);
+	}
+	
+	private void drawPaths(Graphics g) {
+		//TODO
+	}
+	
+	private void paintCoordinateText(Graphics g) {
+		g.setColor(Color.WHITE);
+		
+		//int[] longitude = new int[2];
+		//longitude[0] = (int)(mouseCoordinate.giveLongitude()/Math.PI * 180);
+		//longitude[1] = 
+		
+		g.drawString(mouseCoordinate.giveLongitude()/Math.PI*180 + ", " + mouseCoordinate.giveLatitude()/Math.PI*180 , 5, 25);
 	}
 	
 	private void paintHelpText(Graphics g) {

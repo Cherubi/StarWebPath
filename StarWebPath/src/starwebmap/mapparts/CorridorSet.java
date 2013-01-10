@@ -27,8 +27,11 @@ public class CorridorSet {
 	public CorridorSet(String savefile, int savesize) {
 		this.corridors = new Corridor[savesize];
 		
+		if (savefile.length() == 0) {
+			return;
+		}
 		String[] corridorList = savefile.split("\n");
-		for (int i=0; i<corridorList.length; i++) {
+		for (int i=0; i<corridorList.length; i++) { //last empty line not counted
 			if (corridorList[i].split(" ").length == 4) {
 				makeCorridor(corridorList[i]);
 			}
@@ -79,6 +82,10 @@ public class CorridorSet {
 	}
 	
 	private void doubleSize() {
+		if (corridors.length == 0) {
+			corridors = new Corridor[2];
+			return;
+		}
 		Corridor[] newVersionOfCorridors = new Corridor[corridors.length*2];
 		
 		for (int i=0; i<corridors.length; i++) {
@@ -91,12 +98,14 @@ public class CorridorSet {
 	/**
 	 * Adds a new corridor the the set.
 	 * 
-	 * @param corridor The corridor to be added.
+	 * @param corridor The corridor to be added
+	 * @return Returns the new id of the corridor
 	 */
-	public void addCorridor(Corridor corridor) {
+	public int addCorridor(Corridor corridor) {
 		int onGoingId = findFreeId();
 		corridor.setId(onGoingId*2+1);
 		corridors[onGoingId] = corridor;
+		return onGoingId*2+1;
 	}
 	
 	/**
@@ -119,11 +128,11 @@ public class CorridorSet {
 	 * @return Returns the wanted corridor.
 	 */
 	public Corridor getCorridor(int id) {
-		if (id < 0 || id >= corridors.length) {
+		if (id < 0 || id >= corridors.length || id%2 == 0) {
 			return null;
 		}
 		
-		return corridors[id];
+		return corridors[(id-1)/2];
 	}
 	
 	/**

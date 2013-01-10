@@ -32,6 +32,7 @@ public class Sphere3DConverter {
 		
 		this.longitude = 0.0; //in radians
 		this.latitude = 0.0; //in radians
+		updateCenterCoordinates();
 		
 		this.windowCoords = new double[36][19][2];
 		this.windowCoordsUpdated = false;
@@ -279,5 +280,39 @@ public class Sphere3DConverter {
 		coordinatesInXyz[2] = latitudeRadius * Math.cos(longitude);
 		
 		return coordinatesInXyz;
+	}
+	
+	/**
+	 * Returns the distance of two coordinates along the surface of the sphere.
+	 * Radius of the sphere is set to 100.
+	 * 
+	 * @param longitude1 Longitude of the first coordinate in radians
+	 * @param latitude1 Latitude of the first coordinate in radians
+	 * @param longitude2 Longitude of the second coordinate in radians
+	 * @param latitude2 Latitude of the second coordinate in radians
+	 * @return The distance of the two coordinates along the surface of the sphere
+	 */
+	public double giveDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
+		double halfAngle = Math.asin(straightDistance(longitude1, latitude1, longitude2, latitude2)/radius);
+		return 2*Math.PI*100*(2*halfAngle/(2*Math.PI));
+	}
+	
+	private double straightDistance(double lon1, double lat1, double lon2, double lat2) {
+		double x1 = giveWindowXCoordinate(lon1, lat1)-centerX;
+		double y1 = -(giveWindowYCoordinate(lon1, lat1)-centerY);
+		double z1 = Math.pow(radius*radius - x1*x1 - y1*y1, 0.5);
+		if (!isVisible(lon1, lat1)) {
+			z1 = -z1;
+		}
+		
+		//TODO refaktoroi
+		double x2 = giveWindowXCoordinate(lon2, lat2)-centerX;
+		double y2 = -(giveWindowYCoordinate(lon2, lat2)-centerY);
+		double z2 = Math.pow(radius*radius - x2*x2 - y2*y2, 0.5);
+		if (!isVisible(lon2, lat2)) {
+			z2 = -z2;
+		}
+		
+		return Math.pow((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2), 0.5);
 	}
 }

@@ -25,7 +25,7 @@ public class MinimumHeap {
 	 * @param newVortex Vortex to be added.
 	 */
 	public void add(Vortex newVortex) {
-		if (length==heap.length) {
+		if (length==heap.length-1) {
 			doubleLength();
 		}
 		
@@ -62,10 +62,11 @@ public class MinimumHeap {
 	}
 	
 	private void heapify(int i) {
-		if (i <= 0 && i >= length) {
+		if (i <= 0 || i >= length) {
 			return;
 		}
 		
+		System.out.println("heapify " + i);
 		int left = 2*i;
 		int right = 2*i + 1;
 		

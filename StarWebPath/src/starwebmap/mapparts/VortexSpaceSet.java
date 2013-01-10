@@ -8,6 +8,7 @@ package starwebmap.mapparts;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import starwebmap.gui.Sphere3DConverter;
 
 /**
  *
@@ -29,9 +30,14 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	 */
 	public VortexSpaceSet(String savefile, int savesize) {
 		this.vortexSpaces = new VortexSpace[savesize];
+		System.out.println(savefile);
 		
 		String[] spaceList = savefile.split("\n");
-		for (int i=0; i<spaceList.length; i++) {
+		if (savefile.length() == 0) {
+			return;
+		}
+		for (int i=0; i<spaceList.length; i++) { //last empty line not counted
+			System.out.println(i + ": " + spaceList[i]);
 			if (spaceList[i].split(" ")[2].matches("[\\p{ASCII}]")) {
 				makeRoom(spaceList[i]);
 			}
@@ -42,13 +48,18 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	}
 	
 	private void makeRoom(String information) {
-		String[] informationTypes = information.split("|");
+		String[] informationTypes = information.split("%");
+		System.out.println(informationTypes[0]);
 		String[] tidbit = informationTypes[0].split(" ");
-		String[] neighbors = informationTypes[1].split(" ");
 		
 		Room newRoom = makeLonelyRoom(tidbit);
-		addContacts(newRoom, neighbors);
+		if (informationTypes.length > 1) {
+			String[] neighbors = informationTypes[1].split(" ");
+			addContacts(newRoom, neighbors);
+			//TODO same for inner yard
+		}
 		
+		System.out.println("id: " + newRoom.getId()/2);
 		vortexSpaces[newRoom.getId()/2] = newRoom;
 	}
 	
@@ -64,7 +75,10 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 		
 		int size = Integer.parseInt(info[7]);
 		
-		return new Room(id, size);
+		Room room = new Room(id, size);
+		room.setName(constallation, star);
+		room.setPreciseLocation(xDegree, xDegreeMinute, yDegree, yDegreeMinute);
+		return room;
 	}
 	
 	private void addContacts(Room room, String[] neighbors) {
@@ -76,7 +90,7 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	}
 	
 	private void makeYard(String information) {
-		String[] informationTypes = information.split("|");
+		String[] informationTypes = information.split("%");
 		String[] tidbit = informationTypes[0].split(" ");
 		String[] contacts = informationTypes[1].split(" ");
 		
@@ -111,6 +125,11 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	}
 	
 	private void doubleSize() {
+		if (vortexSpaces.length == 0) {
+			vortexSpaces = new VortexSpace[2];
+			return;
+		}
+		
 		VortexSpace[] newVersionOfSpaces = new VortexSpace[vortexSpaces.length*2];
 		
 		for (int i=0; i<vortexSpaces.length; i++) {
@@ -154,12 +173,38 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	 * @param id id of the space.
 	 * @return Requested space.
 	 */
-	public Space getSpace(int id) {
-		if (id < 0 || id >= vortexSpaces.length) {
+	public VortexSpace getSpace(int id) {
+		if (id < 0 || id/2 >= vortexSpaces.length || id%2 != 0) {
 			return null;
 		}
 		
-		return vortexSpaces[id];
+		return vortexSpaces[id/2];
+	}
+	
+	/**
+	 * Returns the space closest to the asked location (in radians).
+	 * 
+	 * @param longitude Chosen longitude in radians
+	 * @param latitude Chosen latitude in radians
+	 * @return The id of the vortex space closest to the asked location
+	 */
+	public int getSpace(double longitude, double latitude, Sphere3DConverter sphereConverter) {
+		int closest = -1;
+		double closestDistance = Integer.MAX_VALUE;
+		for (int i=0; i<vortexSpaces.length; i++) {
+			//System.out.println("hep");
+			if (vortexSpaces[i] != null) {
+				//System.out.println("not null");
+				double[] coords = vortexSpaces[i].getLocation();
+				double distance = sphereConverter.giveDistance(longitude, latitude, coords[0], coords[1]);
+				//System.out.println(distance + " > " + closestDistance);
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					closest = i*2;
+				}
+			}
+		}
+		return closest;
 	}
 	
 	/**
@@ -184,12 +229,13 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 			if (space != null) {
 				if (space instanceof Room) {
 					Room room = (Room)space;
-					savefile += room.getId() + " " + "constallation" + " " + "star" + " " + "23 10 -24 -3" + " " + room.getSize() + "|";
+					int[] location = room.getPreciseLocation();
+					savefile += room.getId() + " " + room.getConstallation() + " " + room.getStarName() + " " + location[0] + " " + location[1] + " " + location[2] + " " + location[3] + " " + room.getSize() + "%";
 					savefile += room.neighborToString() + "\n";
 				}
 				else if (space instanceof InnerYard) {
-					InnerYard yard = (InnerYard)space;
-					savefile += yard.getId() + " " + "23 10 -24 -3" + " " + yard.getSize() + "|";
+					InnerYard yard = (InnerYard)space; //TODO
+					savefile += yard.getId() + " " + "23 10 -24 -3" + " " + yard.getSize() + "%";
 					savefile += yard.neighborToString() + "\n";
 				}
 			}
@@ -206,9 +252,14 @@ public class VortexSpaceSet implements Iterable<VortexSpace>, Iterator<VortexSpa
 	 */
 	@Override
 	public boolean hasNext() {
+		while (count < vortexSpaces.length && vortexSpaces[count] == null) {
+			count++;
+		}
+		
 		if (count < vortexSpaces.length) {
 			return true;
 		}
+		count = 0;
 		return false;
 	}
 	

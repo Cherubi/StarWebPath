@@ -39,6 +39,19 @@ public class Vortex implements Comparable {
 		paths = vortexSpace.getPaths();
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
+	public void setPrevious(int previous) {
+		this.previous = previous;
+	}
+	
+	//TODO
+	public int getPrevious() {
+		return this.previous;
+	}
+	
 	/**
 	 * Returns the ids of the neighbors of a vortex space.
 	 * 

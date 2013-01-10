@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class VortexSpace extends Space {
 	private ArrayList<Integer> paths;
 	private ArrayList<Integer> neighboringSpaces;
+	private int longitude, longitudeMinute, latitude, latitudeMinute;
 	
 	/**
 	 * Takes care of a space between corridors in the game. Can be either room or inner yard.
@@ -28,6 +29,44 @@ public class VortexSpace extends Space {
 		
 		paths = new ArrayList<Integer>();
 		neighboringSpaces = new ArrayList<Integer>();
+	}
+	
+	/**
+	 * Sets a location for the vortex space in radians.
+	 * 
+	 * @param longitude Longitude in radians
+	 * @param latitude Latitude in radians
+	 */
+	public void setLocation(double longitude, double latitude) {
+		double longitudeInDegrees = longitude/Math.PI*180;
+		double latitudeInDegrees = latitude/Math.PI*180;
+		
+		this.longitude = (int)longitudeInDegrees;
+		this.longitudeMinute = (int)((longitudeInDegrees-this.longitude)*60);
+		
+		this.latitude = (int)latitudeInDegrees;
+		this.latitudeMinute = (int)((latitudeInDegrees-this.latitude)*60);
+	}
+	
+	public void setPreciseLocation(int lon, int lonMinute, int lat, int latMinute) {
+		this.longitude = lon;
+		this.longitudeMinute = lonMinute;
+		
+		this.latitude = lat;
+		this.latitudeMinute = latMinute;
+	}
+	
+	/**
+	 * Returns the location of the vortex space in radians.
+	 * 
+	 * @return [longitude, latitude] in radians
+	 */
+	public double[] getLocation() {
+		return new double[]{(longitude+longitudeMinute/60.0)/180*Math.PI, (latitude+latitudeMinute/60.0)/180*Math.PI};
+	}
+	
+	public int[] getPreciseLocation() {
+		return new int[]{longitude, longitudeMinute, latitude, latitudeMinute};
 	}
 	
 	/**

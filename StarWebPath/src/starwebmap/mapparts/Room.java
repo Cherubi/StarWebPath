@@ -19,6 +19,7 @@ import starwebmap.oergi.Oergi;
  */
 
 public class Room extends VortexSpace {
+	private String constallation, star;
 	
 	/**
 	 * Takes care of defining a room in the game.
@@ -28,6 +29,25 @@ public class Room extends VortexSpace {
 	 */
 	public Room(int id, int size) {
 		super(id, size);
+		constallation = "?";
+		star = "?";
+	}
+	
+	public boolean setName(String constallation, String star) {
+		if (constallation.contains("%") || star.contains("%")) {
+			return false;
+		}
+		this.constallation = constallation;
+		this.star = star;
+		return true;
+	}
+	
+	public String getConstallation() {
+		return constallation;
+	}
+	
+	public String getStarName() {
+		return star;
 	}
 	
 	//so far isn't very testable, lack of a document is a reminder to test

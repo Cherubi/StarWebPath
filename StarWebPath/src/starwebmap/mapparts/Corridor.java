@@ -101,6 +101,10 @@ public class Corridor extends Space {
 	//TODO, will tell if a certain creature has access to the corridor.
 	@Override
 	public boolean gainPassage(Oergi oergi) {
+		if (jumpheight == 3) { //a wall, no real corridor
+			return false;
+		}
+		
 		Element element = oergi.getElement();
 		ElementMovability elementMovability = new ElementMovability();
 		Movability movability = elementMovability.getMovability(this.getBiotype(), element);
@@ -137,7 +141,7 @@ public class Corridor extends Space {
 	 * @return Whether a mat was set.
 	 */
 	public boolean setMat(double length/*, Mat mat*/) {
-		if (length >= this.length && !matOnTheFloor) {
+		if (jumpheight != 3 && length >= this.length && !matOnTheFloor) {
 			matOnTheFloor = true;
 			//this.mat = mat;
 			return true;
@@ -168,7 +172,7 @@ public class Corridor extends Space {
 	 * @param time Spent time.
 	 */
 	public void clean(double time) {
-		if (time <= 0) {
+		if (time <= 0 || jumpheight == 3) {
 			return;
 		}
 		

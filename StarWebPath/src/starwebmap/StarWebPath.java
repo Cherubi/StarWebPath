@@ -13,6 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import starwebmap.gui.MapPanel;
 import starwebmap.gui.Nappula;
+import starwebmap.mapparts.CorridorSet;
+import starwebmap.mapparts.VortexSpaceSet;
+import starwebmap.mapparts.savefile.FileSaver;
+import starwebmap.mapparts.savefile.SaveFileOpener;
 
 /**
  *
@@ -48,6 +52,9 @@ public class StarWebPath implements Runnable {
 	private void createComponents() {
 		this.frame.setLayout(new BorderLayout());
 		
+		map = new MapPanel(this, openVortexSpaceSet(), openCorridorSet()); //TODO
+		this.frame.add(map, BorderLayout.CENTER);
+		
 		menu = new JPanel();
 		menu.setBackground(Color.BLACK);
 		menu.setLayout(new GridLayout(9,1));
@@ -68,9 +75,6 @@ public class StarWebPath implements Runnable {
 		
 		menu.add(makeButton("Choose path", Color.RED, Color.BLACK));
 		this.frame.add(menu, BorderLayout.EAST);
-		
-		map = new MapPanel();
-		this.frame.add(map, BorderLayout.CENTER);
 	}
 	
 	private Nappula makeButton(String text, Color textColor, Color backgroundColor) {
@@ -83,5 +87,28 @@ public class StarWebPath implements Runnable {
 	
 	private void defineSizeFor3DConversions() {
 		map.defineSizeFor3DConversions();
+	}
+	
+	private VortexSpaceSet openVortexSpaceSet() {
+		SaveFileOpener opener = new SaveFileOpener("Vortexes.txt", frame);
+		return new VortexSpaceSet(opener.readFile(), opener.estimateAmount()*2);
+	}
+	
+	private CorridorSet openCorridorSet() {
+		SaveFileOpener opener = new SaveFileOpener("Corridors.txt", frame);
+		return new CorridorSet(opener.readFile(), opener.estimateAmount()*2);
+	}
+	
+	/**
+	 * Saves the changes in vortexes and corridors.
+	 * 
+	 * @param vortexes Vortexset
+	 * @param corridors Corridorset
+	 */
+	public void save(VortexSpaceSet vortexes, CorridorSet corridors) {
+		FileSaver saver = new FileSaver(frame);
+		saver.saveFile("Vortexes.txt", vortexes.saveString());
+		
+		saver.saveFile("Corridors.txt", corridors.saveString());
 	}
 }
